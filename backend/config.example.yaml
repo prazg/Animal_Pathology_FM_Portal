@@ -1,0 +1,33 @@
+# AnimalPath-FM Local Backend Configuration
+# Copy to backend/config.yaml and customize as needed.
+
+host: "127.0.0.1"
+port: 8000
+
+# Optional shared secret for X-Portal-Key header (recommended on shared workstations or Slurm SSH tunnels)
+portal_key: ""
+
+# Allowed browser origins (GitHub Pages + localhost)
+allowed_origins:
+  - "https://prazg.github.io"
+  - "http://localhost:8000"
+  - "http://127.0.0.1:8000"
+  - "http://localhost:5500"
+  - "http://127.0.0.1:5500"
+  - "null"
+
+# Preferred compute device: "auto" | "cuda" | "mps" | "cpu"
+device: "auto"
+
+# Set mock: true (or env PORTAL_MOCK=1) to exercise all model × task pipelines without multi-GB weights
+mock: false
+
+# Optional local vLLM OpenAI-compatible server for TissueDecision-9B high-speed inference
+vllm_base_url: "http://127.0.0.1:8001/v1"
+
+# Directories where local rodent/preclinical whole-slide images (.svs, .ndpi, .tif) may be read
+allowed_wsi_roots:
+  - "./sample_slides"
+
+# Directory for generated job artifacts (.h5, .csv, .geojson)
+artifacts_dir: "./backend/artifacts"

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="brightfield">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AnimalPath-FM — Preclinical, Rodent &amp; Veterinary Pathology Foundation Models</title>
+  <meta name="description" content="Interactive graphical portal and local runner for open-weight animal, rodent (mouse/rat), and toxicologic pathology foundation models, datasets, and papers." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <!-- Sticky Frosted Microscope Header -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="#models" class="brand" id="brandLink">
+        <span class="brand-slide" aria-hidden="true">
+          <span class="brand-frost"></span>
+          <span class="brand-smear"></span>
+        </span>
+        <span class="brand-text">
+          <strong>AnimalPath-FM</strong>
+          <small>Preclinical &amp; Rodent Pathology Portal</small>
+        </span>
+      </a>
+
+      <nav class="main-nav" aria-label="Primary sections">
+        <button type="button" class="nav-btn active" data-section="models">Models <span class="nav-count" id="navModelCount">16</span></button>
+        <button type="button" class="nav-btn" data-section="run">Run</button>
+        <button type="button" class="nav-btn" data-section="results">Results <span class="nav-count" id="navJobCount">0</span></button>
+        <button type="button" class="nav-btn" data-section="datasets">Datasets &amp; Papers</button>
+        <button type="button" class="nav-btn" data-section="connect">Connect</button>
+      </nav>
+
+      <div class="topbar-actions">
+        <button type="button" class="conn-pill demo" id="connPill" title="Click to configure local backend or switch Demo/Server mode">
+          <span class="pulse-dot"></span>
+          <span id="connLabel">Demo Mode (No GPU)</span>
+        </button>
+        <button type="button" class="icon-btn" id="themeToggle" title="Toggle Brightfield / Darkfield Fluorescence theme" aria-label="Toggle color theme">
+          <span id="themeIcon">◐</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- SECTION 1: MODELS RACK -->
+    <section id="sec-models" class="portal-section active">
+      <div class="hero-card">
+        <div class="hero-copy">
+          <div class="eyebrow">Open-Weights Preclinical &amp; Comparative Computational Pathology</div>
+          <h1>Foundation Models for Mouse, Rat &amp; Veterinary Histopathology</h1>
+          <p>
+            Browse, cite, download, and locally execute open-weight histology foundation models tailored or validated for
+            <strong>rodent toxicologic pathology</strong>, <strong>GEMM oncology phenotyping</strong>, <strong>multi-organ mouse segmentation</strong>,
+            and <strong>spatial transcriptomics</strong>. Slide images never leave your workstation.
+          </p>
+          <div class="hero-stats" id="heroStats">
+            <div class="stat-chip"><strong id="statOpenCount">13</strong><span>Runnable Open-Weight Models</span></div>
+            <div class="stat-chip"><strong id="statRefCount">3</strong><span>Proprietary Tox References</span></div>
+            <div class="stat-chip"><strong id="statTaskCount">6</strong><span>Preclinical Tasks</span></div>
+            <div class="stat-chip"><strong id="statDatasetCount">6</strong><span>Rodent Benchmarks &amp; Atlases</span></div>
+          </div>
+        </div>
+        <div class="hero-quickbox">
+          <div class="quickbox-title">Run Locally in One Command</div>
+          <p class="quickbox-sub">Launch the local FastAPI + TRIDENT / Hugging Face bridge on your workstation or HPC node:</p>
+          <div class="code-row">
+            <code id="heroInstallCmd">powershell -ExecutionPolicy Bypass -File docs/install/setup.ps1</code>
+            <button type="button" class="copy-mini" data-copy-target="heroInstallCmd">Copy</button>
+          </div>
+          <div class="quickbox-foot">
+            <span>Or test immediately in-browser using <strong>Demo Mode</strong>.</span>
+            <button type="button" class="link-btn" data-goto="connect">Setup Guide →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Client / Server Hardware Detection Bar -->
+      <div class="hw-bar" id="hwBar">
+        <div class="hw-left">
+          <span class="hw-tag">Hardware Probe</span>
+          <span id="hwSummaryText">Detecting browser WebGPU / WebGL capabilities…</span>
+        </div>
+        <div class="hw-right">
+          <label class="vram-override-label" for="vramSelect">Local GPU VRAM:</label>
+          <select id="vramSelect" class="compact-select">
+            <option value="auto">Auto-detect</option>
+            <option value="4">4 GB (Laptop GPU)</option>
+            <option value="8">8 GB (RTX 3070 / 4060)</option>
+            <option value="12">12 GB (RTX 3060 / 4070)</option>
+            <option value="16">16 GB (RTX 4080 / A4000)</option>
+            <option value="24" selected>24 GB (RTX 3090 / 4090 / L4)</option>
+            <option value="48">48+ GB (A6000 / A100 / H100)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="rack-layout">
+        <!-- Filter Sidebar -->
+        <aside class="filters-panel" aria-label="Model filters">
+          <div class="filter-group">
+            <label class="filter-heading" for="searchInput">Search Models, Species, Organs</label>
+            <input type="search" id="searchInput" class="text-input" placeholder="e.g. rat liver, mouse, Apache, VIPER…" />
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-heading">Species &amp; Domain Alignment</div>
+            <div class="species-pills" id="speciesFilterList">
+              <button type="button" class="pill-btn active" data-species="all">All Models</button>
+              <button type="button" class="pill-btn" data-species="rodent_native">Rodent-Native (Mouse / Rat)</button>
+              <button type="button" class="pill-btn" data-species="multi_species">Multi-Species / Veterinary</button>
+              <button type="button" class="pill-btn" data-species="cross_species">Cross-Species Transfer</button>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-heading">Model Family</div>
+            <div class="family-list" id="familyFilterList"></div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-heading">Access &amp; Local Readiness</div>
+            <label class="check-row">
+              <input type="checkbox" id="chkOpenOnly" checked />
+              <span>Open weights only (runnable locally)</span>
+            </label>
+            <label class="check-row">
+              <input type="checkbox" id="chkUngated" />
+              <span>Ungated (instant HF download)</span>
+            </label>
+            <label class="check-row">
+              <input type="checkbox" id="chkCommercial" />
+              <span>Commercial license allowed</span>
+            </label>
+            <label class="check-row">
+              <input type="checkbox" id="chkFitsHw" />
+              <span>Fits selected GPU VRAM</span>
+            </label>
+            <label class="check-row">
+              <input type="checkbox" id="chkCachedServer" />
+              <span>Cached on connected server</span>
+            </label>
+          </div>
+
+          <button type="button" class="secondary-btn full-width" id="resetFiltersBtn">Reset Filters</button>
+        </aside>
+
+        <!-- Microscope Slide Rack -->
+        <div class="slide-rack-wrap">
+          <div class="rack-toolbar">
+            <span id="showingCountLabel">Showing models…</span>
+            <span class="rack-hint">Click any microscope slide card for papers, BibTeX, HF CLI &amp; local Python code</span>
+          </div>
+          <div class="slide-rack" id="slideRack"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: RUN WORKBENCH -->
+    <section id="sec-run" class="portal-section">
+      <div class="section-header">
+        <div>
+          <h2>Run Preclinical Inference Workbench</h2>
+          <p>Execute open-weight models against your local FastAPI backend (`127.0.0.1:8000`) or simulate rodent histology pipelines in-browser via Demo Mode.</p>
+        </div>
+      </div>
+
+      <form id="runForm" class="run-grid">
+        <div class="run-card">
+          <div class="step-badge">Step 1 · Choose Open-Weight Model</div>
+          <label class="field-label" for="runModelSelect">Foundation Model</label>
+          <select id="runModelSelect" class="text-input"></select>
+          <div id="runModelMeta" class="run-model-meta"></div>
+
+          <div class="step-badge mt-lg">Step 2 · Select Preclinical Task</div>
+          <div id="runTaskControl" class="segmented-tasks"></div>
+          <p id="runTaskDesc" class="muted-note"></p>
+        </div>
+
+        <div class="run-card">
+          <div class="step-badge">Step 3 · Rodent Tissue Input</div>
+          <div id="tileInputBox">
+            <div class="dropzone" id="tileDropzone">
+              <input type="file" id="tileFileInput" accept="image/*" multiple hidden />
+              <div class="dropzone-title">Drop H&amp;E / PAS Rodent ROI Tiles Here</div>
+              <div class="dropzone-sub">PNG, JPG, or TIFF patches · Or leave empty in Demo Mode to use synthetic Sprague-Dawley rat liver &amp; C57BL/6 mouse organ cohorts</div>
+              <button type="button" class="secondary-btn mt-sm" id="browseTilesBtn">Select Image Tiles</button>
+            </div>
+            <div id="tilePreviewStrip" class="thumb-strip"></div>
+          </div>
+
+          <div id="wsiInputBox" class="hidden">
+            <label class="field-label" for="wsiPathInput">Local Server WSI Path (`.svs`, `.ndpi`, `.tif`, `.mrxs`)</label>
+            <input type="text" id="wsiPathInput" class="text-input mono" placeholder="C:\slides\rat_study_04\SD_liver_highdose_01.svs" />
+            <p class="muted-note">Processed locally on your server inside configured <code>allowed_wsi_roots</code>. No pixels are uploaded externally.</p>
+          </div>
+
+          <div class="step-badge mt-lg">Step 4 · Task Parameters</div>
+          <div id="dynamicParamsBox" class="params-stack"></div>
+
+          <div class="run-submit-row">
+            <button type="submit" class="primary-btn" id="submitJobBtn">Run Analysis</button>
+            <span id="runStatusMsg" class="muted-note"></span>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- SECTION 3: RESULTS & VISUALIZERS -->
+    <section id="sec-results" class="portal-section">
+      <div class="section-header">
+        <div>
+          <h2>Results &amp; Pathology Viewers</h2>
+          <p>Inspect lesion triage probabilities, patch embedding PCA clusters, MegaMouse compartment overlays, and virtual mouse spatial gene expression.</p>
+        </div>
+        <button type="button" class="secondary-btn" id="loadSampleJobsBtn">Load Sample Rodent Cohort Runs</button>
+      </div>
+
+      <div class="results-layout">
+        <aside class="jobs-sidebar" id="jobsList">
+          <div class="empty-box">No runs yet. Submit a job in <strong>Run</strong> or click <strong>Load Sample Rodent Cohort Runs</strong>.</div>
+        </aside>
+        <div class="viewer-stage" id="viewerStage">
+          <div class="empty-box large">Select a completed run on the left to inspect interactive visualizers and export <code>.h5</code> / <code>.csv</code> / <code>.geojson</code> artifacts.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: DATASETS & PAPERS DIRECTORY -->
+    <section id="sec-datasets" class="portal-section">
+      <div class="section-header">
+        <div>
+          <h2>Animal Pathology Datasets, Benchmarks &amp; Literature Index</h2>
+          <p>Direct paper DOIs, arXiv/bioRxiv preprints, and CLI download commands for rodent toxicologic pathology and murine histopathology benchmarks.</p>
+        </div>
+      </div>
+
+      <h3 class="subhead">Open Rodent &amp; Comparative Histopathology Benchmarks</h3>
+      <div class="dataset-grid" id="datasetGrid"></div>
+
+      <h3 class="subhead mt-xl">Complete Paper &amp; Citation Table (All 16 Portal Models)</h3>
+      <div class="table-wrap">
+        <table class="data-table" id="papersTable">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Species Scope</th>
+              <th>Weights &amp; License</th>
+              <th>Primary Publication / Preprint</th>
+              <th>Code &amp; Hub Links</th>
+            </tr>
+          </thead>
+          <tbody id="papersTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION 5: CONNECT & LOCAL SETUP -->
+    <section id="sec-connect" class="portal-section">
+      <div class="section-header">
+        <div>
+          <h2>Connect Local Backend &amp; Download Weights</h2>
+          <p>Point this GitHub Pages portal to a FastAPI runner on <code>127.0.0.1:8000</code>, a LAN GPU box, or an SSH-tunneled Slurm HPC node.</p>
+        </div>
+      </div>
+
+      <div class="connect-grid">
+        <div class="run-card">
+          <h3>Execution Mode &amp; Endpoint</h3>
+          <div class="mode-switch-row">
+            <button type="button" class="mode-btn active" data-mode="demo" id="modeDemoBtn">Browser Demo Mode</button>
+            <button type="button" class="mode-btn" data-mode="server" id="modeServerBtn">My Local / HPC Server</button>
+          </div>
+
+          <label class="field-label mt-md" for="backendUrlInput">Backend URL</label>
+          <input type="url" id="backendUrlInput" class="text-input mono" value="http://127.0.0.1:8000" />
+
+          <label class="field-label mt-sm" for="portalKeyInput">Portal Secret Key (<code>X-Portal-Key</code>)</label>
+          <input type="password" id="portalKeyInput" class="text-input mono" placeholder="Optional in local dev; required on shared/HPC nodes" />
+
+          <label class="field-label mt-sm" for="hfTokenInput">Hugging Face Token (Session-only, for gated repos like UNI2-h / Virchow2)</label>
+          <input type="password" id="hfTokenInput" class="text-input mono" placeholder="hf_..." />
+
+          <div class="btn-row mt-md">
+            <button type="button" class="primary-btn" id="pingServerBtn">Test &amp; Connect Server</button>
+            <button type="button" class="secondary-btn" id="checkHfAccessBtn">Verify HF Gated Access</button>
+          </div>
+          <div id="serverHealthBox" class="health-box mt-md">Currently running in client-side <strong>Demo Mode</strong>.</div>
+        </div>
+
+        <div class="run-card">
+          <h3>3-Step Local Backend Launch</h3>
+          <ol class="setup-steps">
+            <li>
+              <strong>1. Automated Setup (Windows PowerShell or Linux/macOS Bash)</strong>
+              <p>Installs Python 3.11 via Astral <code>uv</code>, configures <code>backend/config.yaml</code>, and launches FastAPI:</p>
+              <div class="code-row">
+                <code id="cmdSetupPs">powershell -ExecutionPolicy Bypass -File docs/install/setup.ps1</code>
+                <button type="button" class="copy-mini" data-copy-target="cmdSetupPs">Copy PS1</button>
+              </div>
+              <div class="code-row mt-xs">
+                <code id="cmdSetupSh">bash docs/install/setup.sh</code>
+                <button type="button" class="copy-mini" data-copy-target="cmdSetupSh">Copy Bash</button>
+              </div>
+            </li>
+            <li>
+              <strong>2. Optional High-Throughput vLLM Server for <code>TissueDecision-9B</code></strong>
+              <div class="code-row">
+                <code id="cmdVllm">vllm serve lighteternal/tissuedecision-9b --port 8001 --dtype bfloat16</code>
+                <button type="button" class="copy-mini" data-copy-target="cmdVllm">Copy</button>
+              </div>
+            </li>
+            <li>
+              <strong>3. HPC / Slurm Compute Node via SSH Tunnel</strong>
+              <div class="code-row">
+                <code id="cmdSlurm">sbatch backend/hpc/serve_slurm.sbatch &amp;&amp; ssh -N -L 8000:&lt;gpu-node&gt;:8000 user@cluster</code>
+                <button type="button" class="copy-mini" data-copy-target="cmdSlurm">Copy</button>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="run-card mt-lg">
+        <div class="card-head-inline">
+          <h3>Local Weight Cache &amp; One-Click Downloader</h3>
+          <span class="muted-note">Queries <code>GET /api/weights</code> when connected to your server, or provides direct CLI commands offline.</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>HF Repository</th>
+                <th>Size</th>
+                <th>Gating</th>
+                <th>Server Status</th>
+                <th>Action / CLI</th>
+              </tr>
+            </thead>
+            <tbody id="weightsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="portal-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>AnimalPath-FM</strong> · Open-source graphical portal for preclinical, rodent &amp; veterinary pathology foundation models.
+        Inspired by <a href="https://github.com/prazg/Histology_FM_Portal" target="_blank" rel="noopener">prazg/Histology_FM_Portal</a>.
+      </div>
+      <div>
+        Static GitHub Pages Frontend (<code>docs/</code>) + Local FastAPI Runner (<code>backend/</code>) · Zero external slide uploads.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Slide Card Inspector Drawer -->
+  <dialog id="modelDrawer" class="drawer">
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <div>
+          <div id="drawerBadges" class="badge-row"></div>
+          <h2 id="drawerTitle">Model Name</h2>
+          <div id="drawerOrg" class="drawer-org"></div>
+        </div>
+        <button type="button" class="icon-btn" id="closeDrawerBtn" aria-label="Close details">✕</button>
+      </div>
+
+      <div class="drawer-body" id="drawerBody"></div>
+    </div>
+  </dialog>
+
+  <script type="module" src="assets/app.js"></script>
+</body>
+</html>
