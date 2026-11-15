@@ -1,0 +1,23 @@
+name: CI & Mock Runner Verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-mock-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install lightweight server & test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements-server.txt
+      - name: Validate models.json & execute mock API matrix
+        env:
+          PORTAL_MOCK: "1"
+        run: python -m unittest backend/tests/test_api_mock.py -v
