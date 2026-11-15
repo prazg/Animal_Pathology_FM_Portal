@@ -1,5 +1,7 @@
 # AnimalPath-FM — Preclinical, Rodent & Veterinary Pathology Foundation Models Portal
 
+AnimalPath-FM is a zero-build web portal and local FastAPI bridge for discovering, citing, and executing open-weight histopathology foundation models across mouse, rat, toxicologic, and comparative pathology workflows. Explore models, paper links, CLI/Python quickstarts, and interactive visualizers in-browser or run privacy-preserving inference directly on local GPUs and HPC nodes.
+
 A pure static **GitHub Pages graphical portal (`docs/`)** paired with a **local FastAPI inference & weight-management backend (`backend/`)** for accessing, citing, benchmarking, and locally running open-weight histopathology foundation models on **mouse, rat, toxicologic, and veterinary pathology** slides.
 
 Created and curated by Prajwal Ghimire
