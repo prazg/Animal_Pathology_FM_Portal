@@ -2,8 +2,7 @@
 
 A pure static **GitHub Pages graphical portal (`docs/`)** paired with a **local FastAPI inference & weight-management backend (`backend/`)** for accessing, citing, benchmarking, and locally running open-weight histopathology foundation models on **mouse, rat, toxicologic, and veterinary pathology** slides.
 
-Inspired by the architecture and physical microscope-slide aesthetic of [`prazg/Histology_FM_Portal`](https://github.com/prazg/Histology_FM_Portal).
-
+Created and curated by Prajwal Ghimire
 ---
 
 ## Highlights
@@ -67,3 +66,8 @@ PORTAL_MOCK=1 python -m unittest backend/tests/test_api_mock.py -v
 ```
 
 See [`SETUP.md`](SETUP.md) for GitHub Pages deployment, `vLLM` acceleration, gated Hugging Face tokens, and Slurm HPC tunneling.
+
+## Build
+Created and curated by Prajwal Ghimire
+Copyright @Prajwal Ghimire
+Contact: prajwal.ghimire@crick.ac.uk
