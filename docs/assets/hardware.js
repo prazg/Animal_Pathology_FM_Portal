@@ -18,15 +18,17 @@ export async function probeClientHardware() {
   }
 
   const lower = gpuName.toLowerCase();
-  if (/4090|3090|a5000|l4|rtx 6000|m2 max|m3 max|m4 max/.test(lower)) {
-    estimatedVramGb = 24;
-  } else if (/a100|h100|h200|a6000|l40/.test(lower)) {
+  if (/a100|h100|h200|b200|a6000|rtx 6000|l40s?|m[1-4] ultra/.test(lower)) {
     estimatedVramGb = 48;
-  } else if (/4080|4070 ti|a4000|m1 pro|m2 pro|m3 pro|m4 pro/.test(lower)) {
+  } else if (/5090|4090|3090|a5000|\bl4\b|m[1-4] max/.test(lower)) {
+    estimatedVramGb = 24;
+  } else if (/5080|4080|4070 ti|a4000|m[1-4] pro/.test(lower)) {
     estimatedVramGb = 16;
-  } else if (/3060|4070|3080/.test(lower)) {
+  } else if (/3060|4070|5070|3080/.test(lower)) {
     estimatedVramGb = 12;
-  } else if (/intel|iris|uhd/.test(lower)) {
+  } else if (/3070|4060|2080|2070|rx 6600|rx 7600/.test(lower)) {
+    estimatedVramGb = 8;
+  } else if (/intel|iris|uhd|radeon graphics/.test(lower)) {
     estimatedVramGb = 4;
   }
 

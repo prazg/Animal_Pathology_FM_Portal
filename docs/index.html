@@ -109,6 +109,7 @@
           <label class="vram-override-label" for="vramSelect">Local GPU VRAM:</label>
           <select id="vramSelect" class="compact-select">
             <option value="auto">Auto-detect</option>
+            <option value="2">2 GB (Entry / Integrated)</option>
             <option value="4">4 GB (Laptop GPU)</option>
             <option value="8">8 GB (RTX 3070 / 4060)</option>
             <option value="12">12 GB (RTX 3060 / 4070)</option>
@@ -119,12 +120,40 @@
         </div>
       </div>
 
+      <!-- Preclinical Application Quick-Filter Chips -->
+      <div class="app-filter-bar" role="toolbar" aria-label="Preclinical application quick filters">
+        <span class="app-filter-label">Preclinical Application:</span>
+        <div class="app-chip-list" id="appQuickFilterList">
+          <button type="button" class="app-chip active" data-app="all" aria-pressed="true">
+            <span>All</span><span class="app-chip-count" data-app-count="all">16</span>
+          </button>
+          <button type="button" class="app-chip" data-app="tox_qa" aria-pressed="false">
+            <span>Rodent Toxicologic QA</span><span class="app-chip-count" data-app-count="tox_qa">0</span>
+          </button>
+          <button type="button" class="app-chip" data-app="gemm_oncology" aria-pressed="false">
+            <span>GEMM Mouse Oncology</span><span class="app-chip-count" data-app-count="gemm_oncology">0</span>
+          </button>
+          <button type="button" class="app-chip" data-app="multi_organ_seg" aria-pressed="false">
+            <span>Multi-Organ Segmentation</span><span class="app-chip-count" data-app-count="multi_organ_seg">0</span>
+          </button>
+          <button type="button" class="app-chip" data-app="spatial_omics" aria-pressed="false">
+            <span>Spatial Transcriptomics</span><span class="app-chip-count" data-app-count="spatial_omics">0</span>
+          </button>
+          <button type="button" class="app-chip" data-app="ungated_open" aria-pressed="false">
+            <span>Ungated Open-Weights</span><span class="app-chip-count" data-app-count="ungated_open">0</span>
+          </button>
+        </div>
+      </div>
+
       <div class="rack-layout">
         <!-- Filter Sidebar -->
         <aside class="filters-panel" aria-label="Model filters">
           <div class="filter-group">
-            <label class="filter-heading" for="searchInput">Search Models, Species, Organs</label>
-            <input type="search" id="searchInput" class="text-input" placeholder="e.g. rat liver, mouse, Apache, VIPER…" />
+            <div class="filter-heading-row">
+              <label class="filter-heading" for="searchInput">Search Models, Species, Organs</label>
+              <kbd class="kbd-shortcut" aria-hidden="true" title="Press / to focus search">/</kbd>
+            </div>
+            <input type="search" id="searchInput" class="text-input" placeholder="e.g. rat liver, kidney, GEMM, VIPER…" />
           </div>
 
           <div class="filter-group">
@@ -173,7 +202,7 @@
         <div class="slide-rack-wrap">
           <div class="rack-toolbar">
             <span id="showingCountLabel">Showing models…</span>
-            <span class="rack-hint">Click any microscope slide card for papers, BibTeX, HF CLI &amp; local Python code</span>
+            <span class="rack-hint">Click any slide card for papers, BibTeX &amp; Python · Pin up to 4 models to compare side-by-side</span>
           </div>
           <div class="slide-rack" id="slideRack"></div>
         </div>
@@ -262,7 +291,13 @@
       <h3 class="subhead">Open Rodent &amp; Comparative Histopathology Benchmarks</h3>
       <div class="dataset-grid" id="datasetGrid"></div>
 
-      <h3 class="subhead mt-xl">Complete Paper &amp; Citation Table (All 16 Portal Models)</h3>
+      <div class="subhead-row mt-xl">
+        <h3 class="subhead" style="margin-bottom:0">Complete Paper &amp; Citation Table (All 16 Portal Models)</h3>
+        <div class="btn-row">
+          <button type="button" class="secondary-btn" id="exportAllBibBtn">Export All BibTeX (.bib)</button>
+          <button type="button" class="secondary-btn" id="exportAllCsvBtn">Export All Metadata (.csv)</button>
+        </div>
+      </div>
       <div class="table-wrap">
         <table class="data-table" id="papersTable">
           <thead>
@@ -394,6 +429,44 @@
       </div>
 
       <div class="drawer-body" id="drawerBody"></div>
+    </div>
+  </dialog>
+
+  <!-- Floating Side-by-Side Model Comparator Dock -->
+  <aside id="compareDock" class="compare-dock hidden" aria-label="Side-by-side model comparator">
+    <div class="compare-dock-inner">
+      <div class="compare-dock-left">
+        <span class="compare-dock-badge" id="compareDockCount">Compare (0/4)</span>
+        <div class="compare-dock-chips" id="compareDockChips"></div>
+        <span class="compare-dock-msg" id="compareDockMsg" role="status" aria-live="polite"></span>
+      </div>
+      <div class="compare-dock-actions">
+        <button type="button" class="primary-btn" id="openCompareModalBtn">Compare Side-by-Side</button>
+        <button type="button" class="secondary-btn" id="dockExportBibBtn" title="1-click download BibTeX (.bib) for pinned models">Export .bib</button>
+        <button type="button" class="secondary-btn" id="dockExportCsvBtn" title="1-click download CSV matrix for pinned models">Export .csv</button>
+        <button type="button" class="icon-btn" id="clearCompareBtn" title="Clear pinned models" aria-label="Clear all pinned models">✕</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Side-by-Side Model Comparison Modal -->
+  <dialog id="compareModal" class="compare-modal" aria-labelledby="compareModalTitle">
+    <div class="compare-modal-panel">
+      <div class="compare-modal-header">
+        <div>
+          <div class="eyebrow">Preclinical &amp; Rodent Pathology Comparator</div>
+          <h2 id="compareModalTitle">Side-by-Side Foundation Model Comparison</h2>
+          <div id="compareModalSub" class="drawer-org"></div>
+        </div>
+        <div class="compare-modal-toolbar">
+          <button type="button" class="secondary-btn" id="modalExportBibBtn">Export BibTeX (.bib)</button>
+          <button type="button" class="secondary-btn" id="modalCopyBibBtn">Copy BibTeX</button>
+          <button type="button" class="secondary-btn" id="modalExportCsvBtn">Export Matrix (.csv)</button>
+          <button type="button" class="secondary-btn" id="modalClearCompareBtn">Clear Pins</button>
+          <button type="button" class="icon-btn" id="closeCompareModalBtn" aria-label="Close comparison modal">✕</button>
+        </div>
+      </div>
+      <div class="compare-modal-body" id="compareModalBody"></div>
     </div>
   </dialog>
 
